@@ -1,6 +1,6 @@
 <script>
-	import { dndzone } from 'svelte-dnd-action';
 	import Task from './Task.svelte';
+	import { dndzone } from 'svelte-dnd-action';
 
 	let tasks = [
 		{ id: 1, title: 'Task 1', description: 'This is task 1.', status: 'TODO' },
@@ -18,41 +18,6 @@
 		tasks = e.detail.items;
 	}
 </script>
-
-<div
-	class="task-board"
-	use:dndzone={{ items: tasks, flipDurationMs }}
-	on:consider={handleDndConsider}
-	on:finalize={handleDndFinalize}
->
-	<div class="task-list todo">
-		<h2>TODO</h2>
-		{#each tasks.filter((t) => t.status === 'TODO') as task (task.id)}
-			<div class="task" draggable="true">
-				<h3>{task.title}</h3>
-				<p>{task.description}</p>
-			</div>
-		{/each}
-	</div>
-	<div class="task-list in-dev">
-		<h2>In Development</h2>
-		{#each tasks.filter((t) => t.status === 'INDEV') as task (task.id)}
-			<div class="task" draggable="true">
-				<h3>{task.title}</h3>
-				<p>{task.description}</p>
-			</div>
-		{/each}
-	</div>
-	<div class="task-list done">
-		<h2>DONE</h2>
-		{#each tasks.filter((t) => t.status === 'DONE') as task (task.id)}
-			<div class="task done">
-				<h3>{task.title}</h3>
-				<p>{task.description}</p>
-			</div>
-		{/each}
-	</div>
-</div>
 
 <style>
 	.task-board {
@@ -112,3 +77,30 @@
 		text-decoration: line-through;
 	}
 </style>
+
+<div
+	class="task-board"
+	use:dndzone={{ items: tasks, flipDurationMs }}
+	on:consider={handleDndConsider}
+	on:finalize={handleDndFinalize}
+>
+	<div class="task-list todo">
+		<h2>TODO</h2>
+		{#each tasks.filter((t) => t.status === 'TODO') as task (task.id)}
+		      <Task task={task} />
+		{/each}
+	</div>
+	<div class="task-list in-dev">
+		<h2>In Development</h2>
+		{#each tasks.filter((t) => t.status === 'INDEV') as task (task.id)}
+		      <Task task={task} />
+		{/each}
+	</div>
+	<div class="task-list done">
+		<h2>DONE</h2>
+		{#each tasks.filter((t) => t.status === 'DONE') as task (task.id)}
+		      <Task task={task} />
+		{/each}
+	</div>
+</div>
+
