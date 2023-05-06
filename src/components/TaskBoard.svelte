@@ -1,12 +1,24 @@
 <script>
-	import Task from './Task.svelte';
+	import { flip } from 'svelte/animate';
 	import { dndzone } from 'svelte-dnd-action';
+	import Column from './Column.svelte';
 
-	let tasks = [
-		{ id: 1, title: 'Task 1', description: 'This is task 1.', status: 'TODO' },
-		{ id: 2, title: 'Task 2', description: 'This is task 2.', status: 'TODO' },
-		{ id: 3, title: 'Task 3', description: 'This is task 3.', status: 'TODO' }
-	];
+
+
+	export let columns;
+	// will be called any time a card or a column gets dropped to update the parent data
+	export let onFinalUpdate;
+
+	function handleDndConsiderColumns(e) {
+		columns = e.detail.items;
+	}
+	function handleDndFinalizeColumns(e) {
+		onFinalUpdate(e.detail.items);
+	}
+	function handleItemFinalize(columnIdx, newItems) {
+		columns[columnIdx].items = newItems;
+		onFinalUpdate([...columns]);
+	}
 
 	const flipDurationMs = 300;
 
@@ -19,31 +31,17 @@
 	}
 </script>
 
-<div
-	class="task-board"
-	use:dndzone={{ items: tasks, flipDurationMs }}
-	on:consider={handleDndConsider}
-	on:finalize={handleDndFinalize}
->
-	<div class="task-list todo">
-		<h2>TODO</h2>
-		{#each tasks.filter((t) => t.status === 'TODO') as task (task.id)}
-			<Task {task} />
-		{/each}
+	<div class="task-board" 
+		use:dndzone={{items:columns, flipDurationMs, type:'column'}} 
+		on:consider={handleDndConsiderColumns} 
+		on:finalize={handleDndFinalizeColumns}>
+		    {#each columns as {id, name,items}, idx (id)}
+				<div class="task-list"
+					animate:flip="{{duration: flipDurationMs}}" >    
+								<Column name={name} items={items} onDrop={(newItems) => handleItemFinalize(idx, newItems)} />
+					</div>
+				{/each}
 	</div>
-	<div class="task-list in-dev">
-		<h2>In Development</h2>
-		{#each tasks.filter((t) => t.status === 'INDEV') as task (task.id)}
-			<Task {task} />
-		{/each}
-	</div>
-	<div class="task-list done">
-		<h2>DONE</h2>
-		{#each tasks.filter((t) => t.status === 'DONE') as task (task.id)}
-			<Task {task} />
-		{/each}
-	</div>
-</div>
 
 <style>
 	.task-board {
@@ -52,7 +50,6 @@
 		gap: 1rem;
 		padding: 1rem;
 	}
-
 	.task-list {
 		display: flex;
 		flex-direction: column;
@@ -71,49 +68,4 @@
 		text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
 	}
 
-	.task-list .task {
-		background-color: #f0f0f0;
-		border: 1px solid #ccc;
-		border-radius: 5px;
-		padding: 1rem;
-		margin: 1rem 0;
-		cursor: grab;
-		width: 100%;
-	}
-
-	.task-list .task:hover {
-		background-color: #eee;
-	}
-
-	.task-list .task:active {
-		cursor: grabbing;
-	}
-
-	.task-list .task h3 {
-		font-size: 1.2rem;
-		margin: 0;
-		padding: 0;
-	}
-
-	.task-list .task p {
-		font-size: 0.9rem;
-		margin: 0.5rem 0 0 0;
-		padding: 0;
-	}
-
-	.task-list .task.done {
-		text-decoration: line-through;
-	}
-
-	.task-list.todo {
-		background: linear-gradient(to bottom right, #f76d6d, #ff9c9c);
-	}
-
-	.task-list.in-dev {
-		background: linear-gradient(to bottom right, #6dd5f7, #9ccfff);
-	}
-
-	.task-list.done {
-		background: linear-gradient(to bottom right, #f7d66d, #ffc99c);
-	}
 </style>
